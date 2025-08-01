@@ -142,6 +142,7 @@
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
+            flex-wrap: wrap;
         }
         
         .tab-btn {
@@ -151,6 +152,11 @@
             border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s;
+        }
+        
+        body.dark-mode .tab-btn {
+            background: #1E2A4D;
+            color: #E0E0E0;
         }
         
         .tab-btn.active {
@@ -198,29 +204,32 @@
             margin-bottom: 10px;
         }
         
-        .vote-buttons {
+        .answer-options {
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
         }
         
-        .vote-btn {
-            background: none;
-            border: none;
+        .answer-option {
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 1.2rem;
             transition: all 0.2s;
+            border: 1px solid #ddd;
         }
         
-        .vote-btn:hover {
-            transform: scale(1.2);
+        body.dark-mode .answer-option {
+            background: #2D3436;
+            border-color: #444;
+            color: #E0E0E0;
         }
         
-        .upvote {
-            color: var(--secondary);
-        }
-        
-        .downvote {
-            color: var(--accent);
+        .answer-option:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(5px);
         }
         
         /* Game Styles */
@@ -423,6 +432,7 @@
             justify-content: center;
             gap: 20px;
             margin-top: 10px;
+            flex-wrap: wrap;
         }
         
         .footer-link {
@@ -611,35 +621,53 @@
         const questionTabs = document.querySelectorAll('.tab-btn');
         const tabContents = document.querySelectorAll('.tab-content');
         
-        // Question database
+        // Question database with options
         const questions = {
             fun: [
-                "If you could have any superpower, what would it be and why?",
-                "What's the weirdest food combination you actually enjoy?",
-                "If animals could talk, which would be the rudest?",
-                "What's something that's normal to do at 3 PM but weird to do at 3 AM?",
-                "If you could only eat one food for the rest of your life, what would it be?"
+                {
+                    question: "If you could have any superpower, what would it be?",
+                    options: ["Flight", "Invisibility", "Super Strength", "Teleportation"]
+                },
+                {
+                    question: "What's the weirdest food combination you enjoy?",
+                    options: ["Fries and Ice Cream", "Peanut Butter and Pickles", "Pineapple on Pizza", "Cereal with Orange Juice"]
+                },
+                {
+                    question: "If animals could talk, which would be the rudest?",
+                    options: ["Cats", "Seagulls", "Honey Badgers", "Geese"]
+                }
             ],
             deep: [
-                "What's something you believe that most people disagree with?",
-                "If you could know the absolute truth to one question, what would you ask?",
-                "What do you think is the meaning of life?",
-                "If you could change one thing about the world, what would it be?",
-                "What's the most important lesson life has taught you?"
+                {
+                    question: "What's something you believe that most people disagree with?",
+                    options: ["Aliens exist", "Money can't buy happiness", "School is outdated", "We live in a simulation"]
+                },
+                {
+                    question: "If you could know the absolute truth to one question, what would you ask?",
+                    options: ["Is there an afterlife?", "What's the meaning of life?", "Are we alone in the universe?", "What happens when we die?"]
+                }
             ],
             trivia: [
-                "What's the only mammal capable of true flight? (Answer: Bat)",
-                "Which planet has the most moons? (Answer: Saturn)",
-                "What's the smallest country in the world? (Answer: Vatican City)",
-                "Which language has the most words? (Answer: English)",
-                "What's the longest river in the world? (Answer: Nile)"
+                {
+                    question: "What's the only mammal capable of true flight?",
+                    options: ["Bat", "Flying Squirrel", "Colugo", "Penguin"],
+                    answer: "Bat"
+                },
+                {
+                    question: "Which planet has the most moons?",
+                    options: ["Jupiter", "Saturn", "Neptune", "Uranus"],
+                    answer: "Saturn"
+                }
             ],
             wyr: [
-                "Would you rather have unlimited money but no friends, or unlimited friends but no money?",
-                "Would you rather always be 10 minutes late or always be 20 minutes early?",
-                "Would you rather have a rewind button or a pause button in your life?",
-                "Would you rather be able to talk to animals or speak all human languages?",
-                "Would you rather live in a world without music or a world without color?"
+                {
+                    question: "Would you rather have unlimited money but no friends, or unlimited friends but no money?",
+                    options: ["Unlimited money", "Unlimited friends"]
+                },
+                {
+                    question: "Would you rather always be 10 minutes late or always be 20 minutes early?",
+                    options: ["10 minutes late", "20 minutes early"]
+                }
             ]
         };
         
@@ -649,20 +677,18 @@
                 const tab = document.getElementById(`${type}-tab`);
                 tab.innerHTML = '';
                 
-                questionsList.forEach((question, index) => {
+                questionsList.forEach((q, index) => {
                     const questionCard = document.createElement('div');
                     questionCard.className = 'question-card';
                     questionCard.innerHTML = `
                         <div class="question-type">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
-                        <div class="question-text">${question}</div>
-                        <div class="vote-buttons">
-                            <button class="vote-btn upvote" data-type="${type}" data-index="${index}">
-                                <i class="fas fa-thumbs-up"></i>
-                            </button>
-                            <button class="vote-btn downvote" data-type="${type}" data-index="${index}">
-                                <i class="fas fa-thumbs-down"></i>
-                            </button>
+                        <div class="question-text">${q.question}</div>
+                        <div class="answer-options">
+                            ${q.options.map(option => `
+                                <div class="answer-option">${option}</div>
+                            `).join('')}
                         </div>
+                        ${q.answer ? `<div class="correct-answer" style="display:none">Correct answer: ${q.answer}</div>` : ''}
                     `;
                     tab.appendChild(questionCard);
                 });
@@ -804,27 +830,17 @@
             {
                 question: "What's the largest planet in our solar system?",
                 options: ["Earth", "Jupiter", "Saturn", "Mars"],
-                answer: 1
+                answer: "Jupiter"
             },
             {
                 question: "Which country invented tea?",
                 options: ["India", "China", "England", "Japan"],
-                answer: 1
+                answer: "China"
             },
             {
                 question: "How many bones are in the human body?",
                 options: ["206", "300", "150", "412"],
-                answer: 0
-            },
-            {
-                question: "What's the capital of Australia?",
-                options: ["Sydney", "Melbourne", "Canberra", "Perth"],
-                answer: 2
-            },
-            {
-                question: "Which planet is known as the Red Planet?",
-                options: ["Venus", "Mars", "Jupiter", "Saturn"],
-                answer: 1
+                answer: "206"
             }
         ];
         
@@ -840,31 +856,29 @@
                 const optionElement = document.createElement('div');
                 optionElement.className = 'quiz-option';
                 optionElement.textContent = option;
-                optionElement.dataset.index = index;
-                optionElement.addEventListener('click', checkAnswer);
+                optionElement.addEventListener('click', () => checkAnswer(option));
                 quizOptions.appendChild(optionElement);
             });
             
             quizResult.textContent = '';
         }
         
-        function checkAnswer(e) {
-            const selectedIndex = parseInt(e.target.dataset.index);
-            const correctIndex = quizQuestions[currentQuizIndex].answer;
+        function checkAnswer(selectedAnswer) {
+            const correctAnswer = quizQuestions[currentQuizIndex].answer;
             
-            if (selectedIndex === correctIndex) {
+            if (selectedAnswer === correctAnswer) {
                 quizResult.textContent = "Correct! 🎉";
                 quizResult.style.color = "#00B894";
                 score++;
             } else {
-                quizResult.textContent = `Wrong! The correct answer is: ${quizQuestions[currentQuizIndex].options[correctIndex]}`;
+                quizResult.textContent = `Wrong! The correct answer is: ${correctAnswer}`;
                 quizResult.style.color = "#FD79A8";
             }
             
             // Disable options after answering
             document.querySelectorAll('.quiz-option').forEach(option => {
                 option.style.pointerEvents = 'none';
-                if (parseInt(option.dataset.index) === correctIndex) {
+                if (option.textContent === correctAnswer) {
                     option.style.background = "#00B894";
                     option.style.color = "white";
                 }
@@ -905,6 +919,21 @@
                 const result = wheelOptions[segment];
                 wheelResult.textContent = `You got: ${result}!`;
                 spinBtn.disabled = false;
+                
+                // Auto-scroll to the selected section
+                if (result.includes("fun")) {
+                    document.querySelector('[data-tab="fun"]').click();
+                } else if (result.includes("deep")) {
+                    document.querySelector('[data-tab="deep"]').click();
+                } else if (result.includes("trivia")) {
+                    document.querySelector('[data-tab="trivia"]').click();
+                } else if (result.includes("Rather")) {
+                    document.querySelector('[data-tab="wyr"]').click();
+                } else if (result.includes("Tic-Tac-Toe")) {
+                    document.getElementById('tictactoe').scrollIntoView({ behavior: 'smooth' });
+                } else if (result.includes("quiz")) {
+                    document.getElementById('quiz-game').scrollIntoView({ behavior: 'smooth' });
+                }
             }, 3000);
         }
         
